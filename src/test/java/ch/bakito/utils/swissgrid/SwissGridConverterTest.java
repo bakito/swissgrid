@@ -18,8 +18,11 @@ public class SwissGridConverterTest extends Assert {
 
 	@Test
 	public void toCH1903() {
-		System.err.println(SGC.toCH1903(new WGS84TTo(new BigDecimal(46 * 60 * 60 + 2 * 60 + 38.87), new BigDecimal(8
-				* 60 * 60 + 43 * 60 + 49.79))));
+		CH1903To ch1903 = SGC.toCH1903(new WGS84TTo(new BigDecimal(46 * 60 * 60 + 2 * 60 + 38.87), new BigDecimal(8 * 60 * 60 + 43 * 60
+				+ 49.79)));
+		
+		assertEquals(100000, ch1903.getX());
+		assertEquals(700000, ch1903.getY());
 	}
 
 	@Test
