@@ -24,28 +24,54 @@ public class WGS84 {
 		return east;
 	}
 
-	public String getNorthString() {
-		return "N " + format(north);
+	public String getNorthString(WGS84Format format) {
+		return "N " + format(north, format);
 	}
 
-	public String getEastString() {
-		return "E " + format(east);
+	public String getEastString(WGS84Format format) {
+		return "E " + format(east, format);
 	}
 
-	private String format(BigDecimal seconds) {
+	private String format(BigDecimal decimal, WGS84Format format) {
 		StringBuilder sb = new StringBuilder();
-		int degree = seconds.divide(DEGREE, BigDecimal.ROUND_FLOOR).intValue();
-		sb.append(degree).append("° ");
 
-		BigDecimal minutes = seconds.subtract(new BigDecimal(degree).multiply(DEGREE))
-				.divide(MINUTE, BigDecimal.ROUND_FLOOR).multiply(new BigDecimal(1000));
-		sb.append(minutes.intValue() / 1000.);
+		switch (format) {
+		case Decimal:
+			sb.append(decimal);
+			break;
+
+		case DM:
+			int degree = decimal.intValue();
+			sb.append(degree).append("° ");
+
+			BigDecimal minutes = decimal.subtract(new BigDecimal(degree)).multiply(MINUTE)
+					.multiply(new BigDecimal(1000));
+			sb.append(minutes.intValue() / 1000.).append("'");
+
+			break;
+		case DMS:
+			degree = decimal.intValue();
+			sb.append(degree).append("° ");
+
+			int min = decimal.subtract(new BigDecimal(degree)).multiply(MINUTE).intValue();
+			sb.append(min).append("' ");
+
+			BigDecimal seconds = decimal.subtract(new BigDecimal(degree)).multiply(MINUTE)
+					.subtract(new BigDecimal(min)).multiply(MINUTE).multiply(new BigDecimal(1000));
+			sb.append(seconds.intValue() / 1000.).append("'");
+			break;
+		}
+
 		return sb.toString();
 	}
 
 	@Override
 	public String toString() {
-		return "WGS84T [" + getNorthString() + " " + getEastString() + "]";
+		return toString(WGS84Format.DM);
+	}
+
+	public String toString(WGS84Format format) {
+		return "WGS84T [" + getNorthString(format) + " " + getEastString(format) + "]";
 	}
 
 	public static WGS84 toWGS84(String coordiates) {

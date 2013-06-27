@@ -42,7 +42,8 @@ public class SwissGridConverter {
 				.subtract(new BigDecimal("0.002528").multiply(x.pow(2)))
 				.subtract(new BigDecimal("0.0447").multiply(y.pow(2)).multiply(x))
 				.subtract(new BigDecimal("0.0140").multiply(x.pow(3))).multiply(divisor);
-		return new WGS84(north, east);
+		return new WGS84(north.divide(new BigDecimal(3600), 10, BigDecimal.ROUND_HALF_UP), east.divide(new BigDecimal(
+				3600), 10, BigDecimal.ROUND_HALF_UP));
 	}
 
 }
