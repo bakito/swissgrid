@@ -9,9 +9,9 @@ public class SwissGridConverter {
 	private static BigDecimal lDiff = new BigDecimal("26782.5");
 	private static BigDecimal divisor = new BigDecimal("10000");
 
-	public CH1903To toCH1903(WGS84TTo wgs84tTo) {
-		BigDecimal b = (wgs84tTo.getNorthSeconds().subtract(bDiff)).divide(divisor);
-		BigDecimal l = (wgs84tTo.getEastSeconds().subtract(lDiff)).divide(divisor);
+	public CH1903 toCH1903(WGS84 wgs84t) {
+		BigDecimal b = (wgs84t.getNorthDegrees().subtract(bDiff)).divide(divisor);
+		BigDecimal l = (wgs84t.getEastDegrees().subtract(lDiff)).divide(divisor);
 
 		BigDecimal y = new BigDecimal("600072.37").add(new BigDecimal("211455.93").multiply(l))
 				.subtract(new BigDecimal("10938.51").multiply(l).multiply(b))
@@ -23,10 +23,10 @@ public class SwissGridConverter {
 				.subtract(new BigDecimal("194.56").multiply(l.pow(2)).multiply(b))
 				.add(new BigDecimal("119.79").multiply(b.pow(3)));
 
-		return new CH1903To(x.round(new MathContext(1)).intValue(), y.round(new MathContext(1)).intValue());
+		return new CH1903(x.round(new MathContext(1)).intValue(), y.round(new MathContext(1)).intValue());
 	}
 
-	public WGS84TTo toWGS84(CH1903To ch1903To) {
+	public WGS84 toWGS84(CH1903 ch1903To) {
 		BigDecimal x = new BigDecimal(ch1903To.getX()).subtract(new BigDecimal("200000")).divide(
 				new BigDecimal("1000000"));
 		BigDecimal y = new BigDecimal(ch1903To.getY()).subtract(new BigDecimal("600000")).divide(
@@ -42,7 +42,7 @@ public class SwissGridConverter {
 				.subtract(new BigDecimal("0.002528").multiply(x.pow(2)))
 				.subtract(new BigDecimal("0.0447").multiply(y.pow(2)).multiply(x))
 				.subtract(new BigDecimal("0.0140").multiply(x.pow(3))).multiply(divisor);
-		return new WGS84TTo(north, east);
+		return new WGS84(north, east);
 	}
 
 }
