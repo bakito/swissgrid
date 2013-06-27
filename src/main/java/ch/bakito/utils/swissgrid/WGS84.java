@@ -2,15 +2,8 @@ package ch.bakito.utils.swissgrid;
 
 import java.math.BigDecimal;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class WGS84 {
-
-	private static final Pattern PATTERN_DECIMAL = Pattern.compile("^(\\d{1,2}\\.\\d*)[ ]+(\\d{1,3}\\.\\d*)$");
-	private static final Pattern PATTERN_DM = Pattern
-			.compile("^[NS][ ]+(\\d{1,2})°[ ]+(\\d{1,2}\\.\\d{1,3})[ ]+[EW][ ]+(\\d{1,3})°[ ]+(\\d{1,2}\\.\\d{1,3})$");
-	private static final Pattern PATTERN_DMS = Pattern
-			.compile("^[NS][ ]+\\d{1,2}°[ ]+\\d{1,2}'[ ]+\\d{1,2}\\.\\d{1,3}(\"|'')[ ]+[EW][ ]+\\d{1,3}°[ ]+\\d{1,2}'[ ]+\\d{1,2}\\.\\d{1,3}(\"|'')$");
 
 	private static final BigDecimal MINUTE = new BigDecimal(60);
 	private static final BigDecimal DEGREE = MINUTE.multiply(MINUTE);
@@ -19,8 +12,8 @@ public class WGS84 {
 	private final BigDecimal north;
 
 	public WGS84(BigDecimal north, BigDecimal east) {
-		this.north = north;
-		this.east = east;
+		this.north = north.stripTrailingZeros();
+		this.east = east.stripTrailingZeros();
 	}
 
 	public BigDecimal getNorthDegrees() {
@@ -56,20 +49,26 @@ public class WGS84 {
 	}
 
 	public static WGS84 toWGS84(String coordiates) {
-		Matcher matcher = PATTERN_DECIMAL.matcher(coordiates);
+		Matcher matcher = WGS84Format.Decimal.getPattern().matcher(coordiates);
 		if (matcher.matches()) {
 			return new WGS84(new BigDecimal(matcher.group(1)), new BigDecimal(matcher.group(2)));
 		}
 
-		matcher = PATTERN_DM.matcher(coordiates);
+		matcher = WGS84Format.DM.getPattern().matcher(coordiates);
 		if (matcher.matches()) {
-			return new WGS84(new BigDecimal(matcher.group(1)).add(new BigDecimal(matcher.group(2)).divide(MINUTE)),
-					new BigDecimal(matcher.group(3)).add(new BigDecimal(matcher.group(4)).divide(MINUTE)));
+			return new WGS84(new BigDecimal(matcher.group(1)).add(new BigDecimal(matcher.group(2)).divide(MINUTE, 10,
+					BigDecimal.ROUND_HALF_UP)), new BigDecimal(matcher.group(3)).add(new BigDecimal(matcher.group(4))
+					.divide(MINUTE, 10, BigDecimal.ROUND_HALF_UP)));
 		}
 
-		matcher = PATTERN_DMS.matcher(coordiates);
+		matcher = WGS84Format.DMS.getPattern().matcher(coordiates);
 		if (matcher.matches()) {
-
+			return new WGS84(new BigDecimal(matcher.group(1)).add(
+					new BigDecimal(matcher.group(2)).divide(MINUTE, 10, BigDecimal.ROUND_HALF_UP)).add(
+					new BigDecimal(matcher.group(3)).divide(DEGREE, 10, BigDecimal.ROUND_HALF_UP)), new BigDecimal(
+					matcher.group(5))
+					.add(new BigDecimal(matcher.group(6)).divide(MINUTE, 10, BigDecimal.ROUND_HALF_UP)).add(
+							new BigDecimal(matcher.group(7)).divide(DEGREE, 10, BigDecimal.ROUND_HALF_UP)));
 		}
 		throw new IllegalArgumentException("Unsopported pattern.");
 	}
